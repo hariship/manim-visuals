@@ -77,7 +77,7 @@
 
     <div class="container">
         <video id="preview" controls autoplay loop muted>
-            <source id="videoSource" src="media/videos/test_scene/480p15/SquareToCircle.mp4" type="video/mp4">
+            <source id="videoSource" src="../media/videos/examples/test_scene/480p15/SquareToCircle.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
     </div>
@@ -105,7 +105,7 @@
             const timestamp = new Date().getTime();
 
             // Check if file has changed by checking size
-            fetch('media/videos/test_scene/480p15/SquareToCircle.mp4?t=' + timestamp, {
+            fetch('../media/videos/examples/test_scene/480p15/SquareToCircle.mp4?t=' + timestamp, {
                 method: 'HEAD'
             })
             .then(response => {
@@ -117,7 +117,7 @@
 
                         // Update the video source
                         const currentTime = video.currentTime;
-                        source.src = 'media/videos/test_scene/480p15/SquareToCircle.mp4?t=' + timestamp;
+                        source.src = '../media/videos/examples/test_scene/480p15/SquareToCircle.mp4?t=' + timestamp;
                         video.load();
                         video.currentTime = 0; // Start from beginning
                         video.play();
