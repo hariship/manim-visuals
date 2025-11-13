@@ -10,9 +10,9 @@ manim-visuals/
 ├── tools/                # Development tools
 │   ├── watch.py         # File watcher for auto-rendering
 │   └── viewer.html      # Auto-refreshing browser viewer
-├── examples/            # Example animations
-│   └── test_scene.py   # Sample scenes (SquareToCircle, TextExample, MathEquation)
-├── projects/            # Your animation projects go here
+├── projects/            # Your animation projects
+│   └── basic-shapes/   # Example project
+│       └── test_scene.py
 └── media/              # Rendered videos (auto-generated, gitignored)
 ```
 
@@ -37,20 +37,20 @@ pip install manim
 
 **Terminal 1 - Web Server:**
 ```bash
-python serve.py
+python serve.py basic-shapes test_scene SquareToCircle
 ```
-Opens a browser that auto-refreshes when animations are re-rendered.
+Opens a browser that auto-refreshes. Arguments: `[project] [file] [scene]`
 
 **Terminal 2 - File Watcher:**
 ```bash
 conda activate manim
-python tools/watch.py examples/test_scene.py SquareToCircle
+python tools/watch.py projects/basic-shapes/test_scene.py SquareToCircle
 ```
 Watches for file changes and automatically re-renders.
 
 **Terminal 3 - Code Editor:**
 ```bash
-vim examples/test_scene.py  # or your preferred editor
+vim projects/basic-shapes/test_scene.py  # or your preferred editor
 ```
 
 **Workflow:** Save your code → Watcher auto-renders → Browser auto-refreshes!
@@ -59,7 +59,7 @@ vim examples/test_scene.py  # or your preferred editor
 
 ```bash
 conda activate manim
-manim -pql examples/test_scene.py SquareToCircle
+manim -pql projects/basic-shapes/test_scene.py SquareToCircle
 ```
 
 **Quality Flags:**
@@ -72,9 +72,41 @@ manim -pql examples/test_scene.py SquareToCircle
 - `-p` = Preview (automatically open video)
 - `-s` = Save last frame as image
 
+## Creating a New Project
+
+### 1. Create Project Folder
+
+```bash
+mkdir -p projects/my-project
+cd projects/my-project
+```
+
+### 2. Create Your Animation File
+
+```python
+# projects/my-project/animations.py
+from manim import *
+
+class MyFirstAnimation(Scene):
+    def construct(self):
+        circle = Circle(color=BLUE, fill_opacity=0.5)
+        self.play(Create(circle))
+        self.wait(1)
+```
+
+### 3. Run Live Development
+
+```bash
+# Terminal 1
+python serve.py my-project animations MyFirstAnimation
+
+# Terminal 2
+python tools/watch.py projects/my-project/animations.py MyFirstAnimation
+```
+
 ## Example Scenes
 
-Located in `examples/test_scene.py`:
+Located in `projects/basic-shapes/test_scene.py`:
 
 1. **SquareToCircle** - Basic shape transformation
 2. **TextExample** - Text animations with color changes
@@ -82,11 +114,15 @@ Located in `examples/test_scene.py`:
 
 ```bash
 # Render different scenes
-manim -pql examples/test_scene.py TextExample
-manim -pql examples/test_scene.py MathEquation
+manim -pql projects/basic-shapes/test_scene.py TextExample
+manim -pql projects/basic-shapes/test_scene.py MathEquation
+
+# Or use live development
+python serve.py basic-shapes test_scene TextExample
+python tools/watch.py projects/basic-shapes/test_scene.py TextExample
 ```
 
-## Creating Your Own Animations
+## Creating Animations
 
 ### Basic Scene Structure
 
@@ -130,8 +166,9 @@ RED, BLUE, GREEN, YELLOW, ORANGE, PURPLE, PINK, TEAL, GOLD, WHITE, BLACK
 
 ## Project Organization
 
-- **examples/**: Pre-built example animations for learning
-- **projects/**: Create your own project folders here
+- **projects/**: Each folder is a separate project
+  - Example: `projects/basic-shapes/`, `projects/math-explained/`, etc.
+  - Keeps your work organized and separate
 - **tools/**: Helper scripts for development
 - **media/**: Auto-generated render output (gitignored)
 
@@ -141,7 +178,7 @@ RED, BLUE, GREEN, YELLOW, ORANGE, PURPLE, PINK, TEAL, GOLD, WHITE, BLACK
 2. Use `self.wait(duration)` to pause between animations
 3. Chain animations: `self.play(anim1, anim2)` runs them simultaneously
 4. Use raw strings for LaTeX: `r"\frac{1}{2}"`
-5. Check rendered videos in `media/videos/`
+5. Check rendered videos in `media/videos/projects/[project-name]/`
 
 ## Resources
 

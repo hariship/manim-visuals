@@ -27,6 +27,12 @@
             margin-bottom: 20px;
             font-size: 14px;
         }
+        .project-info {
+            color: #4ecdc4;
+            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: bold;
+        }
         .container {
             max-width: 95vw;
             max-height: 80vh;
@@ -69,15 +75,23 @@
             color: #4ecdc4;
             font-weight: bold;
         }
+        .error {
+            color: #ff6b6b;
+            padding: 20px;
+            background: #2a1a1a;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <h1>🎬 Manim Live Preview</h1>
+    <div class="project-info" id="project-info">Loading...</div>
     <div class="info">Auto-refreshing every 2 seconds</div>
 
     <div class="container">
         <video id="preview" controls autoplay loop muted>
-            <source id="videoSource" src="../media/videos/examples/test_scene/480p15/SquareToCircle.mp4" type="video/mp4">
+            <source id="videoSource" src="" type="video/mp4">
             Your browser does not support the video tag.
         </video>
     </div>
@@ -95,7 +109,21 @@
         </div>
     </div>
 
+    <div id="error" class="error" style="display: none;"></div>
+
     <script>
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const project = urlParams.get('project') || 'basic-shapes';
+        const file = urlParams.get('file') || 'test_scene';
+        const scene = urlParams.get('scene') || 'SquareToCircle';
+
+        // Update project info
+        document.getElementById('project-info').textContent = `${project} / ${scene}`;
+
+        // Build video path
+        const videoPath = `../media/videos/projects/${project}/${file}/480p15/${scene}.mp4`;
+
         let refreshCount = 0;
         let lastSize = 0;
 
@@ -105,10 +133,14 @@
             const timestamp = new Date().getTime();
 
             // Check if file has changed by checking size
-            fetch('../media/videos/examples/test_scene/480p15/SquareToCircle.mp4?t=' + timestamp, {
+            fetch(videoPath + '?t=' + timestamp, {
                 method: 'HEAD'
             })
             .then(response => {
+                if (!response.ok) {
+                    throw new Error('Video not found');
+                }
+
                 const size = response.headers.get('Content-Length');
 
                 if (size && size !== lastSize) {
@@ -116,10 +148,9 @@
                         console.log('New version detected! Refreshing...');
 
                         // Update the video source
-                        const currentTime = video.currentTime;
-                        source.src = '../media/videos/examples/test_scene/480p15/SquareToCircle.mp4?t=' + timestamp;
+                        source.src = videoPath + '?t=' + timestamp;
                         video.load();
-                        video.currentTime = 0; // Start from beginning
+                        video.currentTime = 0;
                         video.play();
 
                         // Update UI
@@ -132,9 +163,15 @@
                     }
 
                     lastSize = size;
+                    document.getElementById('error').style.display = 'none';
                 }
             })
-            .catch(err => console.log('Check failed:', err));
+            .catch(err => {
+                console.log('Check failed:', err);
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent =
+                    `Waiting for video: ${videoPath}\nMake sure watch.py is running and has rendered at least once.`;
+            });
         }
 
         // Check for updates every 2 seconds
@@ -143,6 +180,9 @@
         // Initial load
         window.onload = function() {
             const video = document.getElementById('preview');
+            const source = document.getElementById('videoSource');
+            source.src = videoPath;
+            video.load();
             video.play();
             updateVideo();
         }
