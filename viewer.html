@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manim Live Preview</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #0a0a0a;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        h1 {
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .info {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .container {
+            max-width: 95vw;
+            max-height: 80vh;
+        }
+        video {
+            width: 100%;
+            height: auto;
+            border: 3px solid #333;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.8);
+        }
+        .status {
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            font-size: 13px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ecdc4;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .refresh-count {
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎬 Manim Live Preview</h1>
+    <div class="info">Auto-refreshing every 2 seconds</div>
+
+    <div class="container">
+        <video id="preview" controls autoplay loop muted>
+            <source id="videoSource" src="media/videos/test_scene/480p15/SquareToCircle.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <div class="status">
+        <div class="status-item">
+            <div class="dot"></div>
+            <span>Watching for updates...</span>
+        </div>
+        <div class="status-item">
+            Last update: <span id="last-update">-</span>
+        </div>
+        <div class="status-item">
+            Refreshes: <span id="refresh-count" class="refresh-count">0</span>
+        </div>
+    </div>
+
+    <script>
+        let refreshCount = 0;
+        let lastSize = 0;
+
+        function updateVideo() {
+            const video = document.getElementById('preview');
+            const source = document.getElementById('videoSource');
+            const timestamp = new Date().getTime();
+
+            // Check if file has changed by checking size
+            fetch('media/videos/test_scene/480p15/SquareToCircle.mp4?t=' + timestamp, {
+                method: 'HEAD'
+            })
+            .then(response => {
+                const size = response.headers.get('Content-Length');
+
+                if (size && size !== lastSize) {
+                    if (lastSize !== 0) {
+                        console.log('New version detected! Refreshing...');
+
+                        // Update the video source
+                        const currentTime = video.currentTime;
+                        source.src = 'media/videos/test_scene/480p15/SquareToCircle.mp4?t=' + timestamp;
+                        video.load();
+                        video.currentTime = 0; // Start from beginning
+                        video.play();
+
+                        // Update UI
+                        refreshCount++;
+                        document.getElementById('refresh-count').textContent = refreshCount;
+                        document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+                    } else {
+                        // First load
+                        document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+                    }
+
+                    lastSize = size;
+                }
+            })
+            .catch(err => console.log('Check failed:', err));
+        }
+
+        // Check for updates every 2 seconds
+        setInterval(updateVideo, 2000);
+
+        // Initial load
+        window.onload = function() {
+            const video = document.getElementById('preview');
+            video.play();
+            updateVideo();
+        }
+    </script>
+</body>
+</html>
