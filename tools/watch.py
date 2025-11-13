@@ -34,11 +34,14 @@ def render(file_path, scene_name):
 
 def main():
     if len(sys.argv) < 3:
-        print("Usage: python watch.py <scene_file.py> <SceneName>")
-        print("Example: python watch.py test_scene.py SquareToCircle")
+        print("Usage: python tools/watch.py <scene_file.py> <SceneName>")
+        print("Example: python tools/watch.py examples/test_scene.py SquareToCircle")
         sys.exit(1)
 
-    file_path = Path(sys.argv[1]).resolve()
+    file_path = Path(sys.argv[1])
+    if not file_path.is_absolute():
+        file_path = Path.cwd() / file_path
+
     scene_name = sys.argv[2]
 
     if not file_path.exists():
@@ -46,7 +49,7 @@ def main():
         sys.exit(1)
 
     print(f"{'='*60}")
-    print(f"🔍 Watching: {file_path.name}")
+    print(f"🔍 Watching: {file_path.relative_to(Path.cwd())}")
     print(f"🎯 Scene: {scene_name}")
     print(f"{'='*60}\n")
 

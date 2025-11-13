@@ -30,7 +30,7 @@ def main():
     Handler = MyHTTPRequestHandler
 
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
-        url = f"http://localhost:{PORT}/viewer.html"
+        url = f"http://localhost:{PORT}/tools/viewer.html"
 
         print(f"{'='*60}")
         print(f"🌐 Starting web server...")
